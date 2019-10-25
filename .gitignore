@@ -1,0 +1,16 @@
+.Python
+env/
+build/
+develop-eggs/
+dist/
+lib/
+lib64/
+*.pyc
+.idea/
+
+# Serverless directories
+.serverless
+.coverage
+htmlcov
+node_modules
+venv/

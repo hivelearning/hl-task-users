@@ -1,0 +1,209 @@
+openapi: 3.0.0
+
+info:
+  description: |
+    API to provide endpoints for interacting with a user/profile data store
+  version: 1.0.0
+  title: "User Data Store API"
+
+paths:
+  /:
+    get:
+      summary: List users, either all or a filtered set
+      description: |
+        Retrieve users, optionally filtered by attribute or a subset of the possible profile fields
+      operationId: list_users
+      parameters:
+        - $ref: '#/components/parameters/name'
+        - $ref: '#/components/parameters/country'
+        - $ref: '#/components/parameters/email_domain'
+        - $ref: '#/components/parameters/blood_group'
+      responses:
+        "200":
+          description: Content set
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/UserProfile"
+                  meta:
+                    $ref: "#/components/schemas/ListingMeta"
+
+    post:
+      summary: Add a new user record with profile
+      description: |
+        Adds a new user record, with 0+ associated profile fields
+      operationId: add_user
+      requestBody:
+        description: Data for updating profile
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProfile'
+      responses:
+        "201":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        "400":
+          description: Request invalid
+
+  /{user_id}:
+    parameters:
+      - $ref: "#/components/parameters/user_id"
+
+    get:
+      summary: Retrieve a single user record
+      operationId: get_user
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        "404":
+          description: User not found
+
+    put:
+      summary: Update a user record
+      description: |
+        Updates a single user record
+      operationId: update_user_full
+      requestBody:
+        description: Data for updating profile
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProfile'
+      responses:
+        "204":
+          description: Success
+        "400":
+          description: Request invalid
+        "404":
+          description: User not found
+
+    patch:
+      summary: Partially update a user record
+      description: |
+        Updates a subset of fields for a single user record
+      operationId: update_user_partial
+      responses:
+        "204":
+          description: Success
+        "400":
+          description: Request invalid
+        "404":
+          description: User not found
+
+  /{user_id}/donors:
+    parameters:
+      - $ref: "#/components/parameters/user_id"
+
+    get:
+      summary: List potential blood donors
+      description: |
+        List users who are compatible blood donors for another, ordered so that those in the same country are first
+      operationId: list_blood_donors
+      responses:
+        "200":
+          description: Content set
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/UserProfile"
+                  meta:
+                    $ref: "#/components/schemas/ListingMeta"
+
+components:
+  parameters:
+    user_id:
+      in: path
+      name: user_id
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: ID of the user record to operate on
+    name:
+      in: query
+      name: name
+      required: false
+      schema:
+        type: string
+      description: Name to search for users by
+    country:
+      in: query
+      name: country
+      required: false
+      schema:
+        type: string
+      description: Country to search for users by
+      example: Uruguay
+    email_domain:
+      in: query
+      name: email_domain
+      required: false
+      schema:
+        type: string
+      description: Domain name to match users by
+      example: "yahoo.com"
+    blood_group:
+      in: query
+      name: blood_group
+      required: false
+      schema:
+        type: string
+      description: Blood type to match users by
+      example: "O+"
+
+  schemas:
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        firstname:
+          type: string
+        lastname:
+          type: string
+        profile:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProfileField"
+
+    ProfileField:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        field:
+          type: string
+        value:
+          type: string
+
+    ListingMeta:
+        type: object
+        description: Meta information for a listing to provide pagination info etc
+        properties:
+          cursor:
+            type: string
+          next_cursor:
+            type: string
+
