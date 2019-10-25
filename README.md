@@ -1,4 +1,4 @@
-Users API exercise
+Users API task
 ==================
 
 The aim of this exercise is to build a small API around the data
