@@ -1,9 +1,9 @@
 from flask import Flask, request, jsonify, abort, make_response
-from db_actions import get_db, insert_user, search_user_by_id, user_exists, remove_user, update_user
-from utils import filter_users, format_users, insert_listing_meta
+from db_actions import get_db, insert_user, search_user_by_id, user_exists, remove_user, update_user, search_donors
+from utils import filter_users, format_users, insert_listing_meta, extract_profile, sort_users_by_country
 from validations import validate_request_body
 import copy
- 
+  
 app = Flask(__name__) 
 
 @app.route('/', methods=['GET'])
@@ -84,6 +84,48 @@ def patch_user(user_id):
 
     return jsonify({'Success' : '204'}), 204
 
+@app.route('/<string:user_id>/donors', methods=['GET'])
+def get_donors(user_id):
+    """
+    steps
+    get user
+    get blood_group
+    get compatible donors by user_id
+    get users
+    sort users by country
+    :param user_id:
+    :return:
+    """
+
+    #get_user
+    user = search_user_by_id(user_id)
+    if not user:
+        abort(404)
+
+    profile = extract_profile(user)
+ 
+    #get blood_group
+    blood_group = [x['value'] for x in profile if x['field'] == 'blood_group']    
+    if not blood_group:
+        abort(404)
+
+    #get user_ids
+    user_ids = search_donors(blood_group[0])
+   
+    #remove original user 
+    user_ids.remove(user_id)
+    if not user_ids:
+        abort(404)
+    
+    #get users by id
+    users = [search_user_by_id(x) for x in user_ids]
+    
+    #sort: user's country first 
+    user_country = [x['value'] for x in profile if x['field'] == 'country']
+    if user_country:
+        users = sort_users_by_country(users, user_country[0])
+
+    return jsonify({'data': users, 'meta': insert_listing_meta()})
 
 @app.errorhandler(404)
 def not_found(error):
