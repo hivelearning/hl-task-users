@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, abort, make_response
-from db_actions import get_db, insert_user, search_user_by_id, user_exists, remove_user
+from db_actions import get_db, insert_user, search_user_by_id, user_exists, remove_user, update_user
 from utils import filter_users, format_users, insert_listing_meta
 from validations import validate_request_body
 import copy
@@ -64,6 +64,23 @@ def replace_user(user_id):
     
     remove_user(user_id)
     insert_user(user) 
+
+    return jsonify({'Success' : '204'}), 204
+
+@app.route('/<string:user_id>', methods=['PATCH'])
+def patch_user(user_id):
+    """
+    update user
+    :param user_id:
+    :return:
+    """
+    body = request.json
+    validate_request_body(body, 'PATCH')
+
+    if not user_exists(user_id):
+        abort(404)
+    
+    update_user(user_id, body)
 
     return jsonify({'Success' : '204'}), 204
 

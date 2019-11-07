@@ -50,7 +50,7 @@ def remove_user(user_id):
     """
     db.remove(where('user_id') == user_id)
     db.remove(where('id') == user_id)
-    
+
 def user_exists(user_id):
     """
     User exists
@@ -58,3 +58,43 @@ def user_exists(user_id):
     :return:
     """
     return db.contains((Query().type == 'user') & (Query().id == user_id))
+
+def update_profile_fields(profile_fields, user_id):
+    """
+    update profile field in db
+    :param profile_fields:
+    """
+    User = Query()
+    profile_db = db.search((User.type == 'profile') & (User.user_id == user_id))
+
+    for field in profile_db:
+        for profile_field in profile_fields:
+            if field['field'] == profile_field['field']: 
+                field['value'] = profile_field['value'] 
+
+    db.write_back(profile_db)
+    
+def update_user_field(key, value, user_id):
+    """
+    update user fields
+    :param user
+    """
+    User = Query()    
+    user_db = db.search((User.type == 'user') & (User.id == user_id))
+
+    for user in user_db:
+        if key in user:
+            user[key] = value
+
+    db.write_back(user_db)
+
+def update_user(user_id, body):
+    """
+    updates user
+    :param user_id, body:
+    """
+    for key, value in body.items():
+        if key == 'profile':
+            update_profile_fields(value, user_id)
+        else:
+            update_user_field(key, value, user_id)
