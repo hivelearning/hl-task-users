@@ -1,7 +1,9 @@
 from flask import Flask, request, jsonify, abort, make_response
-from db_actions import get_db
+from db_actions import get_db, insert_user
 from utils import filter_users, format_users, insert_listing_meta
-
+from validations import validate_request_body
+import copy
+ 
 app = Flask(__name__) 
 
 @app.route('/', methods=['GET'])
@@ -17,7 +19,7 @@ def list_users():
     result = format_users(users, profiles)
 
     return jsonify({'data': result, 'meta': insert_listing_meta()})
-    
+
 @app.route('/', methods=['POST'])
 def create_user():
     """
