@@ -58,14 +58,6 @@ def format_users(users, profiles):
 
     return users
 
-def insert_listing_meta():
-    """
-    add in pagination template
-    :param users:
-    :return:
-    """
-    return { "cursor": "string", "next_cursor": "string"}
-
 def create_profile_list(user, profiles):
     """
     formats list of profile fields
@@ -77,5 +69,33 @@ def create_profile_list(user, profiles):
         if user['id'] == profile['user_id']:
             profile_list.append(profile)
     
-    return profile_list    
+    return profile_list
+
+def insert_listing_meta():
+    """
+    add in pagination template
+    :param users:
+    :return:
+    """
+    return { "cursor": "string", "next_cursor": "string"}
+
+def validate_key(body, key):
+    """
+    validates key
+    :params body, string
+    """
+    value = body.get(key)
+    if value is None:
+        abort(400)
+
+def validate_type(body, key, type_val):
+    """
+    validates body
+    :params body, key, type:
+    """
+    value = body.get(key)
+
+    if not type(value) == type_val:
+        abort(400)
+    
 
