@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, abort, make_response
-from db_actions import get_db, insert_user
+from db_actions import get_db, insert_user, search_user_by_id
 from utils import filter_users, format_users, insert_listing_meta
 from validations import validate_request_body
 import copy

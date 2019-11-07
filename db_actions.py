@@ -35,3 +35,10 @@ def insert_profile(profile):
     fields.append({'type': 'profile', 'id': str(uuid.uuid4()),'user_id': profile.get('user_id', None), 'field': profile.get('field', None), 'value': profile.get('value', None)})
     db.insert_multiple(fields)
     return profile
+
+def search_user_by_id(user_id):
+    Users = Query()
+    user = db.search((Users.type == 'user') & (Users.id == user_id))
+    profiles = db.search((Users.type == 'profile') & (Users.user_id == user_id))
+    user = format_users(user, profiles)
+    return user
