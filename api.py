@@ -34,5 +34,14 @@ def create_user():
 
     return jsonify(response), 201
 
+
+@app.errorhandler(404)
+def not_found(error):
+    return make_response(jsonify({'error' : 'Not Found'}),404)
+
+@app.errorhandler(400)
+def request_invalid(error):
+    return make_response(jsonify({'error' : 'Request Invalid'}),400)
+
 if __name__ == '__main__':
     app.run(debug=True) 
