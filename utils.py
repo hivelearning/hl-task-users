@@ -53,8 +53,9 @@ def format_users(users, profiles):
     """
     for user in users:
         profile_list = create_profile_list(user, profiles)
-        user.pop('type')
         user['profile'] = profile_list
+        if 'type' in user:
+            user.pop('type')
 
     return users
 
