@@ -98,3 +98,15 @@ def update_user(user_id, body):
             update_profile_fields(value, user_id)
         else:
             update_user_field(key, value, user_id)
+            
+def search_donors(blood_group):
+    """
+    search donors db
+    :param blood_group:
+    :return list of user ids:
+    """
+    User = Query()
+    user_profiles = db.search((User.type == 'profile') & (User.field == 'blood_group') & (User.value == blood_group))
+    user_id_list = [x['user_id'] for x in user_profiles]
+    
+    return user_id_list
