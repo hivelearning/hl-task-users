@@ -97,5 +97,54 @@ def validate_type(body, key, type_val):
 
     if not type(value) == type_val:
         abort(400)
-    
+       
+def extract_profile(user):
+    """
+    extract profile list from user list
+    :param user:
+    :return:
+    """   
+    return user[0]['profile']
 
+
+def sort_users_by_country(user_list, key):
+    """
+    Sort users, with country 'key' first
+    Steps:
+    1 iterate over users
+    2 check if same country
+    3 re-order output list
+    :params user_list, key:
+    :return:
+    """
+    matching_user_ids = []
+    
+    for user in user_list:  
+        profile_obj = user[0]
+        profile = profile_obj['profile']
+
+        user_id_same_country = [field['user_id'] for field in profile if ((field['field'] == 'country') & (field['value'] == key))]
+        if user_id_same_country:
+            matching_user_ids.append(user_id_same_country[0])
+
+    result = order_output_list_by_country(user_list, matching_user_ids) if matching_user_ids else user_list
+    return result
+
+def order_output_list_by_country(user_list, matching_user_ids):
+    """
+    orders output with same country first
+    :params user_list, matching_user_ids:
+    :return:
+    """
+    output_list = []
+    secondary_list = []
+    for user in user_list:
+        user_dict = user[0]
+
+        if user_dict['id'] in matching_user_ids:
+            output_list.append(user_dict)
+        else:
+            secondary_list.append(user_dict)
+    #merge lists if secondary list
+    result = [y for x in [output_list, secondary_list] for y in x] if secondary_list else output_list
+    return result
