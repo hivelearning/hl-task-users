@@ -1,37 +1,22 @@
-import argparse
-from tinydb import TinyDB, Query
+from flask import Flask, request, jsonify, abort, make_response
+from db_actions import get_db
+from utils import filter_users, format_users, insert_listing_meta
 
-db = TinyDB('hdata.json')
+app = Flask(__name__) 
 
-parser = argparse.ArgumentParser()
-parser.add_argument('-m', '--method', type=str, help='method', default='GET')
-parser.add_argument('-p', '--path', type=str, help='path', default='/')
-args = parser.parse_args()
-
-
+@app.route('/', methods=['GET'])
 def list_users():
     """
-    Sample query listing all users
+    Get users and profiles
     :return:
     """
-    for row in db.search(Query().type == 'user'):
-        print(row)
+    data = get_db()
+ 
+    users = filter_users(data, request.args)
+    profiles = [x for x in data if (x['type'] == 'profile')]
+    result = format_users(users, profiles)
 
+    return jsonify({'data': result, 'meta': insert_listing_meta()})
 
-def list_user_countries():
-    """
-    Sample query listing all countries users are found in
-    :return:
-    """
-    profile = Query()
-    countries = set()
-    for row in db.search((profile.type == 'profile') & (profile.field == 'country')):
-        countries.add(row['value'])
-
-    print(sorted(list(countries)))
-
-
-if args.path == '/':
-    list_users()
-elif args.path == '/countries':
-    list_user_countries()
+if __name__ == '__main__':
+    app.run(debug=True) 
