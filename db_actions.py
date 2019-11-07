@@ -42,3 +42,19 @@ def search_user_by_id(user_id):
     profiles = db.search((Users.type == 'profile') & (Users.user_id == user_id))
     user = format_users(user, profiles)
     return user
+
+def remove_user(user_id):
+    """
+    Remove user
+    :param user:
+    """
+    db.remove(where('user_id') == user_id)
+    db.remove(where('id') == user_id)
+    
+def user_exists(user_id):
+    """
+    User exists
+    :param user_id:
+    :return:
+    """
+    return db.contains((Query().type == 'user') & (Query().id == user_id))

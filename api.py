@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, abort, make_response
-from db_actions import get_db, insert_user, search_user_by_id
+from db_actions import get_db, insert_user, search_user_by_id, user_exists, remove_user
 from utils import filter_users, format_users, insert_listing_meta
 from validations import validate_request_body
 import copy
@@ -30,7 +30,7 @@ def create_user():
     response = copy.deepcopy(user)
 
     validate_request_body(user, 'POST')
-    insert_user(user)
+    insert_user(user) 
 
     return jsonify(response), 201
 
@@ -47,6 +47,26 @@ def get_user_by_id(user_id):
 
     return jsonify({'data': user, 'meta': insert_listing_meta()})
  
+@app.route('/<string:user_id>', methods=['PUT'])
+def replace_user(user_id):
+    """
+    replace user,
+    (!) the id's of profile fields are newly created
+    :param user_id:
+    :return:
+    """
+    user = request.json
+
+    validate_request_body(user, 'PUT')
+    
+    if not user_exists(user_id):
+        abort(404)
+    
+    remove_user(user_id)
+    insert_user(user) 
+
+    return jsonify({'Success' : '204'}), 204
+
 
 @app.errorhandler(404)
 def not_found(error):
