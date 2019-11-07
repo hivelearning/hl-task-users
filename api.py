@@ -17,6 +17,20 @@ def list_users():
     result = format_users(users, profiles)
 
     return jsonify({'data': result, 'meta': insert_listing_meta()})
+    
+@app.route('/', methods=['POST'])
+def create_user():
+    """
+    Create single user
+    :return:
+    """        
+    user = request.json
+    response = copy.deepcopy(user)
+
+    validate_request_body(user, 'POST')
+    insert_user(user)
+
+    return jsonify(response), 201
 
 if __name__ == '__main__':
     app.run(debug=True) 
