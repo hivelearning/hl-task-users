@@ -34,6 +34,19 @@ def create_user():
 
     return jsonify(response), 201
 
+@app.route('/<string:user_id>', methods=['GET'])
+def get_user_by_id(user_id):
+    """
+    Get user by id
+    :param user_id:
+    :return:
+    """    
+    user = search_user_by_id(user_id) 
+    if not user:
+        abort(404)  
+
+    return jsonify({'data': user, 'meta': insert_listing_meta()})
+ 
 
 @app.errorhandler(404)
 def not_found(error):
